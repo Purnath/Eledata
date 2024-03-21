@@ -43,6 +43,7 @@ print("MiniAOD input files are used")
 
 process.source = cms.Source ("PoolSource", fileNames = inputFiles ) 
 
+#Specify the appropriate Globaltag for the respective CMSSW verison and data used.
 process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/76X_dataRun2_16Dec2015_v0.db')
 process.GlobalTag.globaltag = '76X_dataRun2_16Dec2015_v0'
 
