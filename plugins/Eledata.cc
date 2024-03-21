@@ -1,0 +1,343 @@
+// -*- C++ -*-
+//
+// Package:    eledata\Eledata
+// Class:      Eledata
+// 
+/**\class Eledata Eledata.cc eledata/Eledata/plugins/Eledata.cc
+
+ Description: EDAnalyzer to Generate NTuple ROOT File with electron variables
+
+ Implementation: In CMSSW_7_6_7/src/
+ $ scram b
+ $ cmsRun eledata/Eledata/python/edata_cfg.py file
+*/
+//
+// Original Author:  
+//         Created:  Fri, 08 Mar 2024 05:08:11 GMT
+//
+//
+
+#include "ele.h"
+
+
+Eledata::Eledata(const edm::ParameterSet& iConfig):
+  //doEle_(iConfig.getParameter<bool>("doEle")),
+  
+  effectiveAreas_( (iConfig.getParameter<edm::FileInPath>("effAreasConfigFile")).fullPath() )
+
+  
+{
+  beamSpotToken_    = consumes<reco::BeamSpot> 
+    (iConfig.getParameter <edm::InputTag>
+     ("beamSpot"));
+  rhoToken_    = consumes<double> 
+    (iConfig.getParameter <edm::InputTag>
+     ("rho"));
+
+  //AOD Tokens
+  // electronToken_ = mayConsume<edm::View<reco::GsfElectron>>
+  // (iConfig.getParameter<edm::InputTag>
+  // ("electrons"));
+  // vtxToken_ = mayConsume<reco::VertexCollection>
+  //   (iConfig.getParameter<edm::InputTag>
+  //    ("vertices"));
+  // conversionsToken_ = mayConsume< reco::ConversionCollection >
+  //   (iConfig.getParameter<edm::InputTag>
+  //    ("conversions"));
+
+   // MiniAOD tokens
+  electronsMiniAODToken_    = mayConsume<edm::View<pat::Electron> >
+    (iConfig.getParameter<edm::InputTag>
+     ("electronsMiniAOD"));
+  // vtxMiniAODToken_          = mayConsume<reco::VertexCollection>
+  //   (iConfig.getParameter<edm::InputTag>
+  //    ("verticesMiniAOD"));
+  conversionsMiniAODToken_ = mayConsume< reco::ConversionCollection >
+    (iConfig.getParameter<edm::InputTag>
+     ("conversionsMiniAOD"));
+  
+  //now do what ever initialization is needed
+  
+  edm::Service<TFileService> fs;
+  mtree = fs->make<TTree>("Events", "Events");
+
+  mtree->Branch("rho",&rho_ , "rho/F");
+  
+  mtree->Branch("numberelectron",&numelectron);   
+  mtree->GetBranch("numberelectron")->SetTitle("number of electrons");
+  mtree->Branch("ele_e",&ele_e);
+  mtree->GetBranch("ele_e")->SetTitle("ele energy");
+  mtree->Branch("ele_eSC",&ele_eSC);
+  mtree->GetBranch("ele_eSC")->SetTitle("ele supercluster energy");
+  mtree->Branch("ele_pt",&ele_pt);
+  mtree->GetBranch("ele_pt")->SetTitle("ele transverse momentum");
+  // mtree->Branch("ele_px",&ele_px);
+  // mtree->GetBranch("ele_px")->SetTitle("ele momentum x-component");
+  // mtree->Branch("ele_py",&ele_py);
+  // mtree->GetBranch("ele_py")->SetTitle("ele momentum y-component");
+  // mtree->Branch("ele_pz",&ele_pz);
+  // mtree->GetBranch("ele_pz")->SetTitle("ele momentum z-component");
+  mtree->Branch("ele_eta",&ele_eta);
+  mtree->GetBranch("ele_eta")->SetTitle("ele pseudorapidity");
+  mtree->Branch("ele_etaSC",&ele_etaSC);
+  mtree->GetBranch("ele_etaSC")->SetTitle("ele Supercluster pseudorapidity");
+  mtree->Branch("ele_phi",&ele_phi);
+  mtree->GetBranch("ele_phi")->SetTitle("ele polar angle");
+  mtree->Branch("ele_phiSC",&ele_phiSC);
+  mtree->GetBranch("ele_phiSC")->SetTitle("ele Supercluster polar angle");
+  mtree->Branch("ele_ch",&ele_ch);
+  mtree->GetBranch("ele_ch")->SetTitle("ele charge");
+  mtree->Branch("ele_iso",&ele_iso);
+  mtree->GetBranch("ele_iso")->SetTitle("ele isolation");
+  mtree->Branch("ele_veto",&ele_veto);//
+  mtree->GetBranch("ele_veto")->SetTitle("ele veto");//
+  mtree->Branch("ele_isLoose",&ele_isLoose);
+  mtree->GetBranch("ele_isLoose")->SetTitle("ele tagged loose");
+  mtree->Branch("ele_isMedium",&ele_isMedium);
+  mtree->GetBranch("ele_isMedium")->SetTitle("ele tagged medium");
+  mtree->Branch("ele_isTight",&ele_isTight);
+  mtree->GetBranch("ele_isTight")->SetTitle("ele tagged tight");
+  // mtree->Branch("ele_dxy",&ele_dxy);
+  // mtree->GetBranch("ele_dxy")->SetTitle("ele transverse plane impact parameter (mm)");
+  // mtree->Branch("ele_dz",&ele_dz);
+  // mtree->GetBranch("ele_dz")->SetTitle("ele longitudinal impact parameter (mm)");
+  // mtree->Branch("ele_dxyError",&ele_dxyError);
+  // mtree->GetBranch("ele_dxyError")->SetTitle("ele transverse impact parameter uncertainty (mm)");
+  // mtree->Branch("ele_dzError",&ele_dzError);
+  // mtree->GetBranch("ele_dzError")->SetTitle("ele longitudinal impact parameter uncertainty (mm)");
+  mtree->Branch("ele_ismvaLoose",&ele_ismvaLoose);
+  mtree->GetBranch("ele_ismvaLoose")->SetTitle("ele mva Loose");
+  mtree->Branch("ele_ismvaTight",&ele_ismvaTight);
+  mtree->GetBranch("ele_ismvaTight")->SetTitle("ele mva Tight");
+  // mtree->Branch("ele_ip3d",&ele_ip3d);
+  // mtree->GetBranch("ele_ip3d")->SetTitle("ele impact parameter in 3d");
+  // mtree->Branch("ele_sip3d",&ele_sip3d);
+  // mtree->GetBranch("ele_sip3d")->SetTitle("ele significance on impact parameter in 3d");
+
+  mtree->Branch("ele_dEtaIn",&ele_dEtaIn);
+  mtree->GetBranch("ele_dEtaIn")->SetTitle("difference b/w eta of ele seed and track");
+  mtree->Branch("ele_dPhiIn",&ele_dPhiIn);
+  mtree->GetBranch("ele_dPhiIn")->SetTitle("difference b/w phi of ele seed and track");
+  mtree->Branch("ele_hOverE",&ele_hOverE);
+  mtree->GetBranch("ele_hOverE")->SetTitle("Hadronic over em energy ratio");
+  mtree->Branch("ele_full5x5_sigmaIetaIeta",&ele_full5x5_sigmaIetaIeta);
+  mtree->GetBranch("ele_full5x5_sigmaIetaIeta")->SetTitle("ele_full5x5_sigmaIetaIeta");
+  mtree->Branch("ele_isoChargedHadrons",&ele_isoChargedHadrons);
+  mtree->Branch("ele_isoNeutralHadrons",&ele_isoNeutralHadrons);
+  mtree->Branch("ele_isoPhotons",&ele_isoPhotons);
+  mtree->Branch("ele_relCombIsoWithEA",&ele_relCombIsoWithEA);
+  mtree->Branch("ele_isoChargedFromPU",&ele_isoChargedFromPU);
+  mtree->Branch("ele_ooEmooP",&ele_ooEmooP);
+  mtree->Branch("ele_passConversionVeto_", &ele_passConversionVeto_);
+  
+}
+
+
+Eledata::~Eledata()
+{
+ 
+  // do anything here that needs to be done at desctruction time
+  // (e.g. close files, deallocate resources etc.)
+  
+}
+
+
+//
+// member functions
+//
+
+// ------------ method called for each event  ------------
+void
+Eledata::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+{
+  using namespace edm;
+  using namespace std;
+  using namespace reco;
+  
+  // Handle<pat::ElectronCollection> electrons; // add from this line
+  // iEvent.getByToken(electronToken_, electrons);
+
+  // Get the beam spot
+  edm::Handle<reco::BeamSpot> theBeamSpot;
+  iEvent.getByToken(beamSpotToken_,theBeamSpot);
+  
+  edm::Handle<edm::View<pat::Electron> > electrons;
+  // bool isAOD = false;
+  // if( isAOD )
+  //   iEvent.getByToken(electronToken_, electrons);
+  // else
+       iEvent.getByToken(electronsMiniAODToken_, electrons);
+
+  // Get PV
+  // edm::Handle<reco::VertexCollection> vertices;
+  // if( isAOD )
+  //   iEvent.getByToken(vtxToken_, vertices);
+  // else
+  //   iEvent.getByToken(vtxMiniAODToken_, vertices);
+
+  // const reco::Vertex &primaryVertex = vertices->front(); 
+  // math::XYZPoint pv(vertices->begin()->position());
+  
+   // Get the conversions collection
+  edm::Handle<reco::ConversionCollection> conversions;
+  // if(isAOD)
+  //   iEvent.getByToken(conversionsToken_, conversions);
+  // else
+       iEvent.getByToken(conversionsMiniAODToken_, conversions);
+  
+  // Get rho value
+  edm::Handle< double > rhoH;
+  iEvent.getByToken(rhoToken_,rhoH);
+  rho_ = *rhoH;
+  
+  numelectron = 0;
+  ele_e.clear();
+  ele_pt.clear();
+  ele_eSC.clear();
+  ele_pt.clear();
+  // ele_px.clear();
+  // ele_py.clear();
+  // ele_pz.clear();
+  ele_eta.clear();
+  ele_phi.clear();
+  ele_etaSC.clear();
+  ele_phiSC.clear();
+  ele_ch.clear();
+  ele_iso.clear();
+  ele_veto.clear();//
+  ele_isLoose.clear();
+  ele_isMedium.clear();
+  ele_isTight.clear();
+  // ele_dxy.clear();
+  // ele_dz.clear();
+  // ele_dxyError.clear();
+  // ele_dzError.clear();
+  ele_ismvaLoose.clear();
+  ele_ismvaTight.clear();
+  // ele_ip3d.clear();
+  // ele_sip3d.clear();
+  ele_dEtaIn.clear();
+  ele_dPhiIn.clear();
+  ele_hOverE.clear();
+  ele_full5x5_sigmaIetaIeta.clear();
+  ele_isoChargedHadrons.clear();
+  ele_isoNeutralHadrons.clear();
+  ele_isoPhotons.clear();
+  ele_relCombIsoWithEA.clear();
+  ele_isoChargedFromPU.clear();
+  ele_ooEmooP.clear();
+  ele_passConversionVeto_.clear();
+  
+  // for (const pat::Electron &el : *electrons) {
+  for (size_t i = 0; i < electrons->size(); ++i){
+    const auto el = electrons->ptrAt(i);
+    ele_e.push_back(el->energy());
+    ele_eSC.push_back( el->superCluster()->energy());
+    ele_pt.push_back(el->pt());
+    ele_eta.push_back(el->eta());
+    ele_etaSC.push_back( el->superCluster()->eta());
+    ele_phi.push_back(el->phi());
+    ele_phiSC.push_back( el->superCluster()->phi());
+    // ele_px.push_back(el.px());
+    // ele_py.push_back(el.py());
+    // ele_pz.push_back(el.pz());
+    ele_ch.push_back(el->charge());
+    ele_iso.push_back(el->ecalPFClusterIso());
+    ele_veto.push_back(el->electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-veto"));//
+    ele_isLoose.push_back(el->electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"));
+    ele_isMedium.push_back(el->electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-medium"));
+    ele_isTight.push_back(el->electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"));
+    // ele_dxy.push_back(el.gsfTrack()->dxy(pv));
+    // ele_dz.push_back(el.gsfTrack()->dz(pv));
+    // ele_dxyError.push_back(el.gsfTrack()->d0Error());
+    // ele_dzError.push_back(el.gsfTrack()->dzError());
+    ele_ismvaLoose.push_back(el->electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"));
+    ele_ismvaTight.push_back(el->electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp80"));
+
+    //get impact parameter in 3D
+    // https://github.com/cms-sw/cmssw/blob/CMSSW_7_6_X/PhysicsTools/PatAlgos/plugins/PATElectronProducer.cc
+    // This is needed by the IPTools methods from the tracking group
+    // edm::ESHandle<TransientTrackBuilder> trackBuilder;
+    // iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilder);      
+    // reco::TransientTrack tt = trackBuilder->build(el.gsfTrack());
+    // std::pair<bool,Measurement1D> ip3dpv = IPTools::absoluteImpactParameter3D(tt, primaryVertex);
+    // ele_ip3d.push_back(ip3dpv.second.value());
+    // ele_sip3d.push_back(ip3dpv.second.significance());
+
+
+    ele_dEtaIn.push_back( el->deltaEtaSuperClusterTrackAtVtx() );
+    ele_dPhiIn.push_back( el->deltaPhiSuperClusterTrackAtVtx() );
+
+    ele_hOverE.push_back( el->hadronicOverEm() );
+    ele_full5x5_sigmaIetaIeta.push_back( el->full5x5_sigmaIetaIeta() );
+
+    if( el->ecalEnergy() == 0 ){
+      //        printf("Electron energy is zero!\n");
+      ele_ooEmooP.push_back( 1e30 );
+    }else if( !std::isfinite(el->ecalEnergy())){
+      printf("Electron energy is not finite!\n");
+      ele_ooEmooP.push_back( 1e30 );
+    }else{
+      ele_ooEmooP.push_back( fabs(1.0/el->ecalEnergy() - el->eSuperClusterOverP()/el->ecalEnergy() ) );
+    }
+
+    //Isolation
+    GsfElectron::PflowIsolationVariables pfIso = el->pfIsolationVariables();
+    // Compute individual PF isolations
+    ele_isoChargedHadrons.push_back( pfIso.sumChargedHadronPt );
+    ele_isoNeutralHadrons.push_back( pfIso.sumNeutralHadronEt );
+    ele_isoPhotons.push_back( pfIso.sumPhotonEt );
+    ele_isoChargedFromPU.push_back( pfIso.sumPUPt );
+
+    // Compute combined relative PF isolation with the effective area correction for pile-up
+    float abseta =  abs(el->superCluster()->eta());
+    float eA = effectiveAreas_.getEffectiveArea(abseta);
+    ele_relCombIsoWithEA.push_back( ( pfIso.sumChargedHadronPt
+				       + std::max( 0.0f, pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - eA*rho_) )/ el->pt() );
+
+    bool passConvVeto = !ConversionTools::hasMatchedConversion(*el, conversions, theBeamSpot->position());
+    ele_passConversionVeto_.push_back( (int) passConvVeto );
+    
+    numelectron++;
+
+      
+  }                   
+  
+  mtree->Fill();
+  return;
+  // #ifdef THIS_IS_AN_EVENT_EXAMPLE
+  //    Handle<ExampleData> pIn;
+  //    iEvent.getByLabel("example",pIn);
+  // #endif
+  
+  // #ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
+  //    ESHandle<SetupData> pSetup;
+  //    iSetup.get<SetupRecord>().get(pSetup);
+  // #endif
+}
+
+
+// ------------ method called once each job just before starting event loop  ------------
+void 
+Eledata::beginJob()
+{
+}
+
+// ------------ method called once each job just after ending the event loop  ------------
+void 
+Eledata::endJob() 
+{
+}
+
+// ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
+void
+Eledata::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  //The following says we do not know what parameters are allowed so do no validation
+  // Please change this to state exactly what you do use, even if it is no parameters
+  edm::ParameterSetDescription desc;
+  desc.setUnknown();
+  descriptions.addDefault(desc);
+}
+
+//define this as a plug-in
+DEFINE_FWK_MODULE(Eledata);
