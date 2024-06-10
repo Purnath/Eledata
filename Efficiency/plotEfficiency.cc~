@@ -1,0 +1,278 @@
+#include <iostream>
+#include <fstream>
+#include <TROOT.h>
+#include <TObject.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1F.h>
+#include <TEfficiency.h>
+#include <TGraphAsymmErrors.h>
+#include <TString.h>
+#include <TStyle.h>
+
+void plotEfficiency()
+{
+  TFile *file1 = TFile::Open("Ztoll_M_dist.root","READ");
+  if (!file1 || file1->IsZombie()) {
+    std::cerr << "Error opening file: " << "Ztoll_M_dist.root" << std::endl;
+    return;
+  }
+  TFile *file2 = TFile::Open("MCZtoll_M_dist.root","READ");
+  if (!file2 || file2->IsZombie()) {
+    std::cerr << "Error opening file: " << "MCZtoll_M_dist.root" << std::endl;
+    return;
+  }
+
+  // Create a new ROOT file for writing
+  TFile *outputFile = new TFile("Efficiency_plots.root", "recreate");
+  
+  gStyle->SetOptStat(0);
+  gStyle->SetPaintTextFormat("1.2f");
+
+  TMultiGraph *mg = new TMultiGraph();
+  
+  ifstream infile;
+  infile.open("ptetaphihists.txt");
+  while(!infile.eof())
+    {
+      TH1F *h_total;
+      TH1F *h_pass;
+      TH1F *h_totalMC;
+      TH1F *h_passMC;
+      
+      //TH2F *h2_total;
+      //TH2F *h2_pass;
+      
+      TEfficiency* grl=0 ;
+      TEfficiency* grlMC=0 ;
+      TGraphAsymmErrors* gra=0 ; 
+      
+      TString histname;
+      infile>>histname;
+      //if(infile.eof()) break;
+      TString total = histname.Data(); 	
+      total += "_total"; 
+      TString pass = histname.Data(); 	
+      pass += "_pass";
+      
+      cout<<"hist : "<<histname.Data()<<endl;//<<"  ,rootFile : "<<rootFile.Data()<<endl;
+
+      h_total = (TH1F*)file1->Get(total.Data());
+      h_pass = (TH1F*)file1->Get(pass.Data());
+      h_totalMC = (TH1F*)file2->Get(total.Data());
+      h_passMC = (TH1F*)file2->Get(pass.Data());
+      
+      
+      if(total.Contains("pt")){
+	h_total->GetXaxis()->SetTitle("p_{T} in (GeV)");h_totalMC->GetXaxis()->SetTitle("p_{T} in (GeV)");
+	h_total->SetTitle("pt_eff_data");h_totalMC->SetTitle("pt_eff_MC");
+	h_pass->GetXaxis()->SetTitle("p_{T} in (GeV)");h_passMC->GetXaxis()->SetTitle("p_{T} in (GeV)");
+      }
+      if(total.Contains("eta")){
+	h_total->GetXaxis()->SetTitle("|#eta|");h_totalMC->GetXaxis()->SetTitle("|#eta|");
+	h_total->SetTitle("#eta eff_data");h_totalMC->SetTitle("#eta eff_MC");
+	h_pass->GetXaxis()->SetTitle("|#eta|");h_passMC->GetXaxis()->SetTitle("|#eta|");
+      }
+      if(total.Contains("phi")){
+	h_total->GetXaxis()->SetTitle("#phi in rad");h_totalMC->GetXaxis()->SetTitle("#phi in rad");
+	h_total->SetTitle("#phi eff_data");h_totalMC->SetTitle("#phi eff_MC");
+	h_pass->GetXaxis()->SetTitle("#phi in rad");h_passMC->GetXaxis()->SetTitle("#phi in rad");
+      }
+      h_total->GetYaxis()->SetRangeUser(0,1);
+      h_total->GetYaxis()->SetTitle("Efficiency");
+      h_pass->GetYaxis()->SetTitle("Efficiency");
+      h_pass->GetYaxis()->SetRangeUser(0,1);
+      h_totalMC->GetYaxis()->SetRangeUser(0,1);
+      h_totalMC->GetYaxis()->SetTitle("Identification efficiency");
+      h_passMC->GetYaxis()->SetTitle("Identification efficiency");
+      h_passMC->GetYaxis()->SetRangeUser(0,1);
+      
+      TCanvas *c = new TCanvas(histname.Data(),histname.Data(),200,10,600,500);      
+      c->SetLogy(0);
+      
+      //grl = (TH1F*)h_pass->Clone("grl");
+      grl = new TEfficiency(*h_pass,*h_total);
+      grl->SetLineColor(1);
+      grl->SetMarkerStyle(20);
+      grl->SetMarkerColor(1);
+      //grl->Divide(h_total);
+      grl->SetTitle("");
+      //grl->GetXaxis()->SetTitle("");
+      //grl->GetYaxis()->SetTitle("Identification Efficiency");
+
+      outputFile->cd();
+      grl->Write();
+
+      int nBins = grl->GetTotalHistogram()->GetNbinsX();
+
+      std::cout << "Bin\tEfficiency\tError Low\tError High \t for data" << std::endl;
+      for (int i = 1; i <= nBins; ++i) {
+        double efficiency = grl->GetEfficiency(i);
+        double errorLow = grl->GetEfficiencyErrorLow(i);
+        double errorHigh = grl->GetEfficiencyErrorUp(i);
+        
+        std::cout << i << "\t" << efficiency << "\t" << errorLow << "\t" << errorHigh << std::endl;
+      }
+
+      // TString pngFileName = histname.Data() ;
+      // TString pname = histname.Data();
+      // pname += "_efficiency";
+      // pngFileName +=  "_efficiency.png";
+      // c->SaveAs(pngFileName.Data());
+      // c->Clear();
+      
+      //grlMC = (TH1F*)h_passMC->Clone("grlMC");
+      grlMC= new TEfficiency(*h_passMC,*h_totalMC);
+      grlMC->SetLineColor(1);
+      grlMC->SetMarkerStyle(20);
+      grlMC->SetMarkerColor(2);
+      //grlMC->Divide(h_totalMC);
+      grlMC->SetTitle("");
+      //grlMC->GetXaxis()->SetTitle("");
+      //grlMC->GetYaxis()->SetTitle("");
+      outputFile->cd();
+      grlMC->Write();
+
+      nBins = grlMC->GetTotalHistogram()->GetNbinsX();
+
+      std::cout << "Bin\tEfficiency\tError Low\tError High \t for MC" << std::endl;
+      for (int i = 1; i <= nBins; ++i) {
+        double efficiency = grlMC->GetEfficiency(i);
+        double errorLow = grlMC->GetEfficiencyErrorLow(i);
+        double errorHigh = grlMC->GetEfficiencyErrorUp(i);
+        
+        std::cout << i << "\t" << efficiency << "\t" << errorLow << "\t" << errorHigh << std::endl;
+      }
+      
+      //grlMC-> Scale ( grl -> Integral()/ grlMC -> Integral());
+      
+      TPad pad1 ( " pad1 " ," pad1 " ,0 ,0 ,1 ,1);
+      //pad1.SetLogy( true );
+      pad1.Draw();
+      pad1.cd();
+      grlMC -> Draw( " pe " );
+      grl-> Draw( " pe , same " );
+      gPad->Update();
+      grlMC->GetPaintedGraph()->GetXaxis()->SetTitle(h_total->GetXaxis()->GetTitle());
+      grlMC->GetPaintedGraph()->GetYaxis()->SetTitle("Identification Efficiency");
+      grlMC->GetPaintedGraph()->GetYaxis()->SetRangeUser(0,1);
+      if(total.Contains("pt")){
+	grlMC->GetPaintedGraph()->GetXaxis()->SetRangeUser(0,100);
+      }
+      
+      TPaveText *pt1 = new TPaveText(0.1,0.89,0.6,1,"NDC");
+      pt1->SetBorderSize(0);
+      pt1->SetFillColor(0);
+      pt1->SetFillStyle(0);
+      pt1->AddText("CMS Open Data #sqrt{s}=13 TeV (2015)");
+      //pt1->AddText("");
+      pt1->Draw("same");
+
+      // Add legend
+      TLegend* l1 = new TLegend(0.2,0.75,0.35,0.88); // Define legend position
+      l1->SetBorderSize(0);
+      //l1->SetHeader("Barrel");
+      l1->AddEntry(grl, "Data", "aep"); // Add entry for data
+      l1->AddEntry(grlMC, "Z->ee(MC)", "aep"); // Add entry for MC
+      l1->Draw(); // Draw legend
+
+      // gra = new TEfficiency(*grl,*grlMC);
+      // gra->SetLineColor(1);
+      // //gra->SetName(graph_name.Data());
+      // gra->SetMarkerStyle(20);
+      // gra->SetMarkerColor(1);
+      // gra->SetTitle("");
+
+      
+      // Get the number of bins
+      // int nbins = grl->GetTotalHistogram()->GetNbinsX();
+      // cout<<nbins<<endl;
+      // // Clear the TGraphAsymmErrors object
+      // gra->Clear();
+      
+      // // Loop over bins to calculate the ratio
+      // for (int i = 0; i < nbins; ++i) {
+      //   // Calculate the efficiency ratios
+      // 	double eff_grMC = grlMC->GetEfficiency(i + 1);
+      // 	cout<<eff_grMC<<"\t here1 \t";
+      // 	double eff_gr = grl->GetEfficiency(i + 1);
+      // 	cout<<eff_gr<<"\t here2 \t";
+      //   double ratio = (eff_grMC != 0.0) ? eff_gr / eff_grMC : 0.0;
+      // 	cout<<ratio<<"\t here3 \t"<<endl;
+      // 	// Calculate the bin center
+      //   double x = grl->GetTotalHistogram()->GetXaxis()->GetBinCenter(i + 1);
+
+      //   // Calculate the vertical asymmetric errors
+      //   double errorLow_gr = grl->GetEfficiencyErrorLow(i + 1);
+      //   double errorUp_gr = grl->GetEfficiencyErrorUp(i + 1);
+      //   double errorLow_grMC = grlMC->GetEfficiencyErrorLow(i + 1);
+      //   double errorUp_grMC = grlMC->GetEfficiencyErrorUp(i + 1);
+
+      //   // Calculate the horizontal asymmetric errors
+      //   double errorXLow = 0.5 * grl->GetTotalHistogram()->GetXaxis()->GetBinWidth(i + 1);
+      //   double errorXUp = errorXLow;
+
+      //   // Add a point to the TGraphAsymmErrors object
+      //   int pointIndex = gra->GetN();
+      //   gra->SetPoint(pointIndex, x, ratio);
+
+      //   // Set the asymmetric errors
+      //   gra->SetPointError(pointIndex,errorXLow,errorXUp,ratio*sqrt(pow(errorLow_gr/eff_gr,2)+pow(errorLow_grMC/eff_grMC,2)), ratio*sqrt(pow(errorUp_gr/eff_gr,2)+pow(errorUp_grMC/eff_grMC,2)));
+ 
+      // }
+      
+      // gra ->GetXaxis()->SetTitle(h_total->GetXaxis()->GetTitle());
+      // gra -> GetXaxis() -> SetTitleOffset(0.8);
+      // gra -> GetXaxis() -> SetLabelSize(0.12);
+      // gra -> GetXaxis() -> SetTitleSize(0.15);
+      // gra -> GetYaxis() -> SetLabelSize(0.1);
+      // gra -> GetYaxis() -> SetTitleSize(0.15);
+      // gra -> GetYaxis() -> SetTitle( "Data/MC" );
+      // gra -> GetYaxis() -> SetTitleOffset(0.3);
+      // //gra->Draw("APE");
+      // //gra ->GetYaxis()->SetRangeUser(0,1);
+      
+      // c->cd();
+      // TPad pad2( "pad2" ,"pad2" ,0 ,0.0 ,1 ,0.3);
+      // pad2.Draw();
+      // pad2.cd();
+      // gra->Draw( "pe" );
+      //gPad->Update();
+      
+      // pad1.SetBottomMargin (0);
+      // pad2.SetTopMargin(0);
+      // pad2.SetBottomMargin(0.25);
+      outputFile->cd();
+      c->Write();
+      TString pngFileName = histname.Data();
+      pngFileName +=  "_efficiency.png";
+      c->SaveAs(pngFileName.Data());
+      c->Clear();
+      
+      
+      
+      // TString graph_name = histname.Data();
+      // graph_name += "_ratio_eff";
+      // //gra = new TGraphAsymmErrors (h_total_ratio,h_pass_ratio); 
+
+      // pngFileName = histname.Data() ;
+      // pname = histname.Data();
+      // pname += "_ratio_efficiency";
+      // pngFileName +=  "_ratio_efficiency.png";
+      // c->SaveAs(pngFileName.Data());
+      // c->Clear();
+      
+      //gSystem->Exec("mkdir  results");
+      //TString dirName = "results";
+      //dirName+=histname.Data();
+      //gSystem->Exec("mkdir "+ dirName);
+      //gSystem->Exec("move " + pname +" results");
+      delete grl;
+      delete grlMC;
+      delete gra;
+      delete c;
+    }
+  outputFile->Close();
+  
+  delete mg;
+}

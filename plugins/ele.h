@@ -23,6 +23,9 @@
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 #include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
 
+//class for MET 
+#include "DataFormats/PatCandidates/interface/MET.h"
+
 //Transient track for impact parameter
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
@@ -76,6 +79,7 @@ private:
   // ----------member data --------------------------
   edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
   edm::EDGetTokenT<double> rhoToken_;
+  edm::EDGetTokenT<pat::METCollection> metToken_;
   
   // AOD case data members
   // edm::EDGetToken electronToken_;
@@ -92,6 +96,14 @@ private:
   
   TTree *mtree;
   int numelectron; //number of electrons in the event
+  
+  float met_e;
+  float met_pt;
+  float met_px;
+  float met_py;
+  float met_phi;
+  float met_significance;
+     
   std::vector<double> ele_e;
   std::vector<double> ele_eSC;
   std::vector<double> ele_pt;

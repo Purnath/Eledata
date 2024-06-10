@@ -5,6 +5,24 @@ import FWCore.ParameterSet.Types as CfgTypes
 from FWCore.ParameterSet.VarParsing import VarParsing
 import sys
 
+#---- sys.argv takes the parameters given as input cmsRun Eledata/python/edata_cfg.py <isData (default=False)>
+#----  e.g: cmsRun Eledata/python/edata_cfg.py True
+#---- NB the first two parameters are always "cmsRun" and the config file name
+#---- Work with data (if False, assumed MC simulations)
+#---- This needs to be in agreement with the input files/datasets below.
+options = VarParsing ('analysis')
+isData = False
+if len(sys.argv) > 2:
+    try:
+        isData = eval(sys.argv[2])
+        sys.argv.pop( 2 )
+        print "isData is set to ",isData
+    except:
+        pass
+options.parseArguments()
+isMC = True
+if isData: isMC = False
+
 process = cms.Process("EData")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -22,30 +40,637 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.Services_cff')
 
+# Open the text file
+# with open('Run2_2015_SingleElecs_MiniAOD.txt', 'r') as file:
+#     # Read the contents of the file into a variable
+#     file_contents = file.read().rstrip('\n')
 
-# inputFilesAOD = cms.untracked.vstring(
-#     'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/AOD/08Jun2016-v1/10000/0001C591-5A2E-E611-92B2-848F69FD2925.root'
-# )
 
-inputFilesMiniAOD = cms.untracked.vstring(
-    'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/001A703B-B52E-E611-BA13-0025905A60B6.root'
-)
+if isData:
 
-# useAOD = False 
-# if useAOD == True :
-#     inputFiles = inputFilesAOD
-#     outputFile = "electron_ntuple.root"
-#     print("AOD input files are used")
-# else :
-inputFiles = inputFilesMiniAOD
-outputFile = "myElectrons.root"
-print("MiniAOD input files are used")
+    # inputFilesAOD = cms.untracked.vstring(
+    #   'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/AOD/08Jun2016-v1/10000/0001C591-5A2E-E611-92B2-848F69FD2925.root'
+    # )
+    
+    inputFiles = cms.untracked.vstring(#file_contents 
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/001A703B-B52E-E611-BA13-0025905A60B6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0043CCB6-DC2E-E611-98E5-F04DA275C007.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/009A824E-FB2E-E611-9DDC-0090FAA58204.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/00A40B0E-E52E-E611-9D52-002590DB9152.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0201576F-DE2E-E611-8663-7845C4FC38ED.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/02147B45-F42E-E611-879A-0CC47A4D76C8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0216A640-E52E-E611-892A-0CC47A78A3D8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/021F67BC-2B2F-E611-B6DF-0CC47A7452DA.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/02301CA7-DF2E-E611-B562-0CC47A4C8E66.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0236BF36-D42E-E611-B736-008CFA1CB55C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/023C5A69-E22E-E611-88E1-003048FFCC16.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0250D7AC-3A2F-E611-9362-0CC47A7452D8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0263FAA4-DF2E-E611-A352-008CFAFBE7DE.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/02696C2A-552F-E611-B54E-0025905A497A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/02A0455E-DA2E-E611-A95F-0023AEFDE690.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/02CD0353-E62E-E611-9841-7845C4FC3770.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/02CDA950-102F-E611-93F4-0CC47A4C8E26.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/02E23861-472F-E611-96CD-0025905A48D0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/02F17A6E-DA2E-E611-A213-0025905B85BC.root',
+        #'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/02F5D753-022F-E611-932D-00259073E47E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/04553CB0-DF2E-E611-8309-0025905B85DC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/04617FB5-B32E-E611-B757-0CC47A1E0C1C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0467F883-562F-E611-A1FF-0CC47A78A408.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/04B7244A-FB2E-E611-A17B-0CC47A74527A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/04DB0F83-DB2E-E611-8C04-0CC47A1DF616.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/04E0BD71-DA2E-E611-8A24-0CC47A4D766C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/04F8224A-022F-E611-A9E8-0CC47A78A458.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/063055DD-AD2E-E611-ACCC-0CC47A4C8F2C.root',
+        #'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/065CF8AD-3A2F-E611-9307-0025905A60B6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0664DDA6-D72E-E611-A56B-0CC47A4DEDB0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/066697F4-182F-E611-89F6-3417EBE42453.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0684FD84-EB2E-E611-A745-0CC47A4D7604.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0697ABF1-F42E-E611-B3B7-549F358EB77C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/069D206E-DA2E-E611-ACB7-0CC47A4D7630.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/06C0E0C0-3A2F-E611-8CD4-0025905A60D6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/06E4926D-AE2E-E611-929A-0025905B8568.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/06F08E2A-B22E-E611-A797-7845C4FC39E3.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/082F1776-DE2E-E611-BFD2-008CFA0020D4.root',
+        #'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/08771D90-BC2E-E611-8F8F-00266CF9C22C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0884463E-E72E-E611-B6B0-20CF305B055B.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/08AA90BB-E02E-E611-912A-0CC47A4D7626.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/08E19C54-1D2F-E611-97F1-0025905A48EC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/08E698C7-2B2F-E611-BA5E-0CC47A4D7654.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/08F7F56F-DE2E-E611-B785-00266CF897A0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0A12826D-E22E-E611-8E27-0025905A4964.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0A1B5DA5-DF2E-E611-8823-848F69FD43A0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0A7FCC68-D52E-E611-A338-A0369F7FC070.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0A928341-B52E-E611-B8C5-001E67F337BC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0AA11C69-E52E-E611-9690-000F5327372C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0AC52A7A-242F-E611-8006-00266CF9B878.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0C390B48-FB2E-E611-93F7-0CC47A4D75F6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0CC16CB1-D52E-E611-A3D9-001E67F333BB.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0CF32587-DD2E-E611-AECC-008CFAFBEA7E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0E0B7C89-012F-E611-8E14-0CC47A78A3F4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0E189CE9-AB2E-E611-9796-0025905B858E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0E33B38B-3B2F-E611-84D8-0025905A60BE.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0E49BFB5-B32E-E611-AD41-549F35AC7E7D.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0E4DFEF3-182F-E611-A203-848F69FD471E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0E549495-BC2E-E611-BF54-20CF305B0519.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0E932FDE-AD2E-E611-A557-7845C4F91450.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0EADF5AD-DF2E-E611-A43A-0CC47A4D7646.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0EB28352-252F-E611-88ED-0025905A60A6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0EB9D3F1-AC2E-E611-9A69-002590DB9358.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0EC1FDF9-E52E-E611-9EBE-002590DB92BC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0EC68EAC-102F-E611-92A2-0025905B8564.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0EE6AA6B-DE2E-E611-A959-848F69FD4598.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/0EFB1F7A-1D2F-E611-8D52-848F69FD4E98.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/100B61F7-AC2E-E611-A9BD-0CC47A74524E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/101D658D-DD2E-E611-999A-0CC47A4D769E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/101EA469-D52E-E611-8BA7-0CC47A7DFC9A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/102CFDB4-EB2E-E611-BF3B-0025905B85BC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/103391AD-D52E-E611-928F-001E67F33451.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/10385770-DE2E-E611-AB8A-0CC47A4D76B6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/10401A87-562F-E611-8A32-0CC47A4C8F1C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1051FB23-092F-E611-9EC7-0002C94CD13C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1060BE46-FB2E-E611-A69A-0CC47A4D767E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1067F119-5C2F-E611-BFC3-848F69FD2925.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1077B836-452F-E611-A0B0-24BE05C3CCE1.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/10815F6F-DE2E-E611-AFB4-001D09FDD6A2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/10B42B6C-F62E-E611-91ED-0025905C9742.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/10D6296D-DA2E-E611-A7BD-003048FFCBB2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/121D07A6-DF2E-E611-BE53-3417EBE64741.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/123AA2A7-DF2E-E611-9DB6-0CC47A4C8F06.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/123E888A-2B2F-E611-9B7B-0025905A60D2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/124CD350-252F-E611-A3F4-0CC47A4D7614.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/124F8514-432F-E611-B016-0CC47A745250.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/12938C85-EB2E-E611-8F61-0CC47A4D7604.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/12D2D2B4-DC2E-E611-B2C5-0025905A60AA.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/141BF1FA-E12E-E611-86A4-0CC47A4D7626.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/14448997-DE2E-E611-8CE5-0025905A60B0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/148BBEC2-DC2E-E611-8156-0025905B858A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/149D1422-422F-E611-BF15-0CC47A4C8F08.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/14CE516D-DE2E-E611-A72C-0CC47A78A30E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/160FB74D-FB2E-E611-B7B4-0025905A6068.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/162FA4CE-2B2F-E611-9FA8-0025905A608A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1630426E-DE2E-E611-B488-3417EBE64CD5.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/16370C38-B72E-E611-A718-0CC47A4D7666.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/169BBD47-E72E-E611-95DE-0CC47A1E046A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/16BC657A-1D2F-E611-A39E-0CC47A78A4B0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/16D5B636-D42E-E611-86A6-008CFA166014.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/16EC7F08-092F-E611-A253-0CC47A4D7664.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/16F08976-F62E-E611-970D-0025905C2C86.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/18173D7D-AA2E-E611-B2CC-7845C4FC39C8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1828E56C-DE2E-E611-9C56-848F69FD4EB6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/18348A76-F62E-E611-9CA0-0025904C67A6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/184579B3-DC2E-E611-AEE3-0CC47A78A3B4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/185AF08A-B52E-E611-84EF-3417EBE6459A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/186C02AC-FC2E-E611-B99D-7845C4F9CF06.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/189A53D1-BB2F-E611-8ED1-5065F3818261.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/18B044C1-012F-E611-AB64-AC162DA8E1E8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/18EF1A4C-BC2E-E611-B003-848F69FD47A5.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1A4ED9AA-9D2E-E611-9EF5-3417EBE65F65.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1A5B9D6B-102F-E611-A522-0025905A610A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1A7A48DC-F32E-E611-B73E-24BE05C668E1.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1A7F70A9-2B2F-E611-AB9D-0025905A48E4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1AA410A7-FA2E-E611-BFFF-002590D0B004.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1AE675AA-D72E-E611-B7FE-0CC47A1DF810.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1C2AB2B4-DC2E-E611-8833-0CC47A78A3E8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1C3E8F4D-252F-E611-A238-0CC47A4D762A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1C5160B8-A92E-E611-82E2-0CC47A4C8F06.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1CD86E4E-FB2E-E611-B08C-0025905B861C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1CDD2871-E22E-E611-A0A0-0025905B8586.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1E0E3A73-E22E-E611-B5B5-0CC47A4D7674.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1E21EF73-EC2E-E611-A819-001D09FDD91E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1E33E44E-FB2E-E611-97CF-008CFA0020D4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/1E364146-F42E-E611-B3D7-0025905A48BC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/208EB785-DA2E-E611-B0D4-0025905B8580.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2094DD82-BB2E-E611-8688-008CFA0A5738.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/20C789B4-DC2E-E611-92F6-848F69FD4EB6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/220D54A4-DF2E-E611-A0EC-7845C4F90F07.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/224AAE94-BC2E-E611-A5D6-00259073E36E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/22688C6C-DE2E-E611-90E8-848F69FD455F.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/22EBD069-F62E-E611-973C-0025904C6788.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/22ED3872-DE2E-E611-A2A0-0CC47A78A2F6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/22F54EEE-162F-E611-85E6-002590D0B046.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/241FCFC1-002F-E611-B90A-0CC47A7E6A52.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2456C9BE-DC2E-E611-BE54-003048FFCC16.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2460ECDD-082F-E611-B16F-0CC47A4D7626.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/247A6D6C-DA2E-E611-B82F-0025905A60AA.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/24B05EAA-9D2E-E611-A8BF-848F69FD4562.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/24E66EAA-A72E-E611-A2EE-0025905A6066.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/24F29229-DF2E-E611-B046-A0369F7FE970.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/26054AAB-D72E-E611-8336-002590D0AFE0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/26090845-F42E-E611-9545-003048FFD7AA.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/260D34DC-E12E-E611-AC69-0CC47A745284.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/261A7D4C-B72E-E611-858F-0025905A60E4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/261BE9E7-A92E-E611-942D-0CC47A4DEDFC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/26205DB1-D52E-E611-8187-0090FAA57430.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/264DD04E-062F-E611-91DE-842B2B2A9926.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2675FCA7-F42E-E611-A665-0023AEFDEC60.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/26773FA6-102F-E611-BBA8-0025905A6056.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/267EF948-B22E-E611-B7C0-0025905A6136.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/26883EC7-F32E-E611-B605-24BE05C38CA1.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/26A3D4A6-2B2F-E611-9D61-0CC47A4C8E20.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/28313F88-EB2E-E611-B19B-0025905A611E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/28456D27-EC2E-E611-8765-0025905A6056.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/286E6155-FB2E-E611-8611-0025905A60B6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/288474A7-DF2E-E611-85D5-0025905A60F4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/28D9B7A7-DD2E-E611-BDAB-0025905A60C6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/28EE77AD-D52E-E611-9CBE-0090FAA59D74.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/28F73B78-102F-E611-9B01-0025905A6110.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2A276722-092F-E611-BD18-0025905A497A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2A35A0E1-E42E-E611-8986-0CC47A4D7640.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2A48882D-022F-E611-A1BF-0CC47A4D7630.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2A5354B3-1D2F-E611-9746-0025905A610A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2A58140B-422F-E611-B762-0CC47A745250.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2A820F03-AD2E-E611-8CEE-0CC47A4D769A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2A8FA906-252F-E611-B53E-0CC47A4D76B8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2AA28D45-F42E-E611-9970-003048FFD75A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2ABD764E-B52E-E611-A13B-008CFA1979A4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2AE20147-B22E-E611-B161-0CC47A4D760C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2AE6C7B3-D52E-E611-96FF-002590D0B0D8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2C682CB3-DE2E-E611-BED9-0CC47A4D764C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2C7066ED-F32E-E611-A209-24BE05CE1E01.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2C924CD0-A92E-E611-A831-F04DA275C007.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2C9FBA76-F62E-E611-9AC6-0025904C650A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2CB5D90B-092F-E611-BB47-848F69FD43A0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2CB63C04-DF2E-E611-8B4F-0025905B8598.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2CD1DEC7-2B2F-E611-A2EE-0025905A48E4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2CE28629-5C2F-E611-A470-0CC47A74524E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2E0CB790-BC2E-E611-8C8E-00266CF9C22C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2E14C5FA-EB2E-E611-8707-0CC47A78A440.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2E1FC358-A82E-E611-851C-0CC47A4D762A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2E4D00A7-DF2E-E611-9BF7-3417EBE645AF.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2EA325A9-DF2E-E611-925A-0025905A6082.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2EAB8C50-552F-E611-A612-0CC47A4D7670.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2EB31771-DE2E-E611-93BB-0025905A608C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2EC4B291-BC2E-E611-A1E8-F04DA275C316.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/2EE1DBC7-BD2E-E611-AF6F-00266CF9C22C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/305D90AE-2B2F-E611-B678-047D7BD6DE30.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3076028B-DD2E-E611-A75E-0CC47A4D766C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/30C6B67D-AA2E-E611-91F2-0CC47A74524E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3215471C-AD2E-E611-B002-7845C4FC39C8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3217B971-DE2E-E611-8A0D-0CC47A78A2F6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/32634847-FB2E-E611-8BB7-0CC47A4D76D6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3283BE7A-1D2F-E611-B59D-0025905A60B2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/32990FA9-B52E-E611-90BE-7845C4FC3C26.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/32AB4CB5-DC2E-E611-B64E-F04DA275C328.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/32AF7F7F-DB2E-E611-BCED-0025905B85B2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/32D78DC5-EB2E-E611-BC8C-0025905A6080.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/32F32868-E22E-E611-AE3D-0CC47A745294.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/32FE1B23-FC2E-E611-B65C-0025905A48B2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3415E6A2-DF2E-E611-931E-848F69FD2817.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/344B8245-472F-E611-AA7E-0CC47A4C8F0C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/346D6569-F62E-E611-B3C9-0025904C5182.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3483BEEA-B02E-E611-ABE7-0090FAA57BA0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3485080A-092F-E611-97EF-7845C4F92F87.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3488D9A8-AF2E-E611-BC4B-008CFA002FA4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/34B60915-E52E-E611-B88D-0025905B8576.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/34C1F823-092F-E611-BA16-0002C94CD13C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/34CDBBC6-AB2E-E611-BDFF-0CC47A74524E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/36630CEB-AD2E-E611-9EEA-848F69FD3D0D.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/36B3A676-EC2E-E611-981B-008CFA002184.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/36B55756-1D2F-E611-BC6D-0CC47A1DFE60.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/36BE1ABA-012F-E611-8BF6-0CC47A4C8EC8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/36D32E5B-FB2E-E611-A277-0CC47A1DF80C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/36DC5C44-F42E-E611-A6E8-0CC47A78A3EE.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/38032AB2-4E2F-E611-A500-0CC47A4C8F2C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3815C285-DB2E-E611-B11E-0CC47A4C8E98.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/386B5AAB-2B2F-E611-A4D4-0025905B856C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/38A6B2E1-E42E-E611-B0A5-0CC47A4C8E46.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/38B03975-DE2E-E611-8C47-0025905B85B6.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/38C2F823-092F-E611-B51C-0002C94CD13C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/38DE4641-F52E-E611-8EF5-0025904C6374.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3A14CFE3-B02E-E611-9AA6-002590D0AF4C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3A2CBF6C-DE2E-E611-AA27-0CC47A78A418.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3A4CF83A-022F-E611-9334-0CC47A78A458.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3A519F32-D72E-E611-9C5F-0CC47A4DEEE4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3A5F0078-1D2F-E611-9E93-0CC47A4D76C0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3A90DE51-252F-E611-8F89-0025905B85EC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3AA0518A-DD2E-E611-8E3C-7845C4F932D8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3AB00373-EC2E-E611-90BE-848F69FD4E98.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3AB25C9E-242F-E611-90EF-24BE05C6D731.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3ABE8AC1-2B2F-E611-B03E-0025905B858E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3AD74FB5-DC2E-E611-8B13-848F69FD287A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3AE8DD94-FE2E-E611-B8FB-047D7B881D04.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3AFD7176-F62E-E611-9F3C-0025905C54F4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3C77E544-D42E-E611-A25C-549F358EB72E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3C9F0D7C-242F-E611-9088-848F69FD46C1.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3CABAFBB-AF2E-E611-9518-047D7BD6DF2A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3CD02D68-E22E-E611-94A1-0CC47A4D7600.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3CE11B6D-DE2E-E611-BF42-0CC47A78A30E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3E7DA66C-DE2E-E611-B7A1-0CC47A4D7606.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/3EC3C44D-A82E-E611-B6C1-0025905B8612.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/400F1ABC-DC2E-E611-B4A5-0CC47A4D7654.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4052CA68-E22E-E611-91EC-0025905A612E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/40689550-FB2E-E611-A75E-0CC47A4C8E14.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/406C5E15-EC2E-E611-94D8-0025905A60CA.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/40816D60-182F-E611-8B27-00266CF9B878.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/40C70F53-562F-E611-8BA7-20CF305B055B.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/40E40A6E-E22E-E611-BAF0-0025905A60DE.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/40EA1E78-1D2F-E611-BA85-0CC47A4D75EE.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4255B3BD-E02E-E611-A495-0025905A60B0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/426E5A00-472F-E611-857E-0025905A60BE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4271C97B-1D2F-E611-8A7C-0025905A60B2.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/42AD6DAC-DF2E-E611-86A7-0025905B8562.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/42E81F1E-172F-E611-8773-0CC47A4C8F1C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/42F18906-DF2E-E611-84A8-0CC47A4C8F10.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/42F24ABC-DF2E-E611-BEC9-0CC47A78A3F8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/445EE7AE-AB2E-E611-A39A-0CC47A4D769A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/44802741-B72E-E611-9510-0025905B8590.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/448B757C-1D2F-E611-ADA3-0CC47A1DFE60.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/448F5B69-F62E-E611-9B03-0025904C641C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/44976737-EC2E-E611-9574-0CC47A4D75F6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/44C8CEDC-082F-E611-8572-0CC47A78A3D8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/46213485-D72E-E611-9197-0CC47A1DF7FE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/46239624-242F-E611-BEDB-0025905A60B8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/462C2DA6-DF2E-E611-99A0-0025905B85C6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/462C7A5B-A62E-E611-AE4F-7845C4F8AF24.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/463AE30B-472F-E611-A462-0CC47A4D7636.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/467D2C5A-E52E-E611-BC0B-0CC47A4C8F2C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/46C1DF09-FD2E-E611-859A-848F69FD2925.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/480764BB-FC2E-E611-B69D-7845C4FC35D2.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/48276CA6-DF2E-E611-AA80-3417EBE64B25.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/48565AA7-DF2E-E611-A889-848F69FD4E14.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/48568B7A-DB2E-E611-8E64-003048D25BA6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/48822A7E-DF2E-E611-9698-180373FFCED8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/489EF52D-5C2F-E611-B1AC-00259074AE6A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/48CD2697-102F-E611-A24E-0025905B85F6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/48EAA6F3-B72E-E611-A4DE-848F69FD4562.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/48EEBED5-EB2E-E611-B947-0CC47A4D7602.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4A38C918-B22E-E611-B00C-180373FF94D6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4A9267A7-DF2E-E611-BC70-003048FFCC16.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4A986F4B-FB2E-E611-B4A5-0025905B8610.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4ABE5F0A-172F-E611-B5AF-0002C94DBAD2.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4ACFC3D0-E52E-E611-95FD-0090FAA57340.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4AF0221A-172F-E611-8E78-0025905B8562.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4C0B6C1F-332F-E611-9958-0CC47A4D769E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4C0DC9CC-E02E-E611-8EB0-0025905B8590.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4C1D2B48-A32E-E611-BFCA-001E67F3367C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4C2584DD-242F-E611-8CF8-0CC47A78A478.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4C9BFAB2-3A2F-E611-AFBA-0CC47A4D7636.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4CA5A7E7-082F-E611-BE98-0CC47A78A436.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4CD5D098-4E2F-E611-B27A-0CC47A4D7630.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4E1512AB-AF2E-E611-B8ED-848F69FD4ED4.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4E16E873-EC2E-E611-ABF1-F04DA275C328.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4E23EBAC-D52E-E611-BF45-0CC47A7FC844.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4E602627-242F-E611-867E-848F69FD299D.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4E620CD1-FB2E-E611-94E9-848F69FD455F.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4E6EADE2-E22E-E611-B761-008CFA000898.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4E7C324B-FB2E-E611-A222-0CC47A4C8E56.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4E832564-242F-E611-AA49-0CC47A4D7634.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4E867DB5-DC2E-E611-8E9D-848F69FD455F.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4EA49235-472F-E611-81EF-0CC47A78A33E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/4EFE89AB-DF2E-E611-8772-0025905A610C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5061B1B6-FC2E-E611-B916-848F69FDFC5C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5071DC94-B12E-E611-A354-0CC47A4D7636.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/50765177-1D2F-E611-A03C-7845C4F914D4.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/50837CC7-442F-E611-80CB-5065F3818241.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5090C2BC-102F-E611-91CB-0025905A608C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/50928341-B52E-E611-8113-001E67F337BC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/50B49C95-DA2E-E611-B66B-0CC47A78A4BA.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/520FA49B-242F-E611-839B-B8CA3A709648.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/523F28D7-162F-E611-9E90-0CC47A74527A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/523F4C53-172F-E611-86F7-0CC47A1DF7F8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/525E68A5-DF2E-E611-982A-7845C4FC3623.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/526264A5-DF2E-E611-948D-7845C4FC3623.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/529715B3-DC2E-E611-BA70-0CC47A4C8E98.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/52BA4760-112F-E611-810A-0025905C431A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/52C35653-102F-E611-9592-0CC47A4D75EC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/541DA5C9-082F-E611-BE44-0CC47A78A456.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/543218B4-DC2E-E611-A67D-0CC47A4D763C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/547F18A7-AB2E-E611-9E2A-848F69FD29BB.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/54AA95A3-102F-E611-9112-0CC47A4D7640.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/54D2D8B7-DC2E-E611-8FB4-7845C4FC3770.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/54F3BBB5-D52E-E611-9F9F-00259073E3AC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/54F73E3E-DA2E-E611-8E8C-0CC47A4D763C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/54F9824E-102F-E611-84E1-00259073E316.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5633906E-DE2E-E611-B7F6-0025905A48BA.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/563F9625-B12E-E611-AC04-0025905B85E8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/564AA66A-E22E-E611-AABC-0CC47A745284.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/56804245-F42E-E611-BAF5-0CC47A4D7632.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/56D12F9E-DF2E-E611-83C5-0CC47A4D769A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5803ECDF-AD2E-E611-9E53-0CC47A4D7600.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/580D270D-092F-E611-8858-0025905B85D2.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/58238C0B-E52E-E611-913C-0CC47A78A3F8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/58343284-E22E-E611-B3D2-0CC47A78A3F8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/584D6870-DE2E-E611-97B7-0025905B858A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/585C26B9-DC2E-E611-925E-0025905B8590.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/587BF59F-022F-E611-B082-00266CFFCC54.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/58B32462-472F-E611-9A30-0025905A613C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/58CBE492-BC2E-E611-8A0D-7845C4FC3A52.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/58D13AF5-162F-E611-9DF7-0CC47A4C8E56.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/58DA424B-FB2E-E611-9AE4-0CC47A4D7686.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/58FAF675-DE2E-E611-9ADB-0CC47A4D75F4.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5A6CB312-B72E-E611-9135-0CC47A4D76B8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5A7FD053-1D2F-E611-9B75-002590D0AFAE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5A9A42A5-DF2E-E611-ACE0-008CFAFBE7DE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5AB50F73-DE2E-E611-BCF5-0025905A6068.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5AC7967C-D72E-E611-89AF-00266CFFCC54.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5C16E96D-DE2E-E611-BEE5-008CFAFC0500.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5C4AB0C8-AB2E-E611-9C82-7845C4FC39C8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5C5020BA-DA2E-E611-8E1A-0CC47A4D764C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5C5C479E-DC2E-E611-9C2C-003048D25BA6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5C72F032-D42E-E611-8593-549F35AC7DE1.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5C7B82A9-2B2F-E611-8B80-0025905A605E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5C90B211-B12E-E611-BCED-848F69FD4ED4.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5CA9D75A-A72E-E611-92A5-0025905A60AA.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5CBD6A69-E22E-E611-920C-0CC47A78A4B0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5CDBA018-DF2E-E611-B3BF-782BCB779884.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5E1B11D8-082F-E611-9BC4-0CC47A4D7690.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5E27774E-252F-E611-BA68-0CC47A4C8EA8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5E2E2701-DF2E-E611-AD39-848F69FD43A0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5E43FDA5-E02E-E611-BD3A-0CC47A4D7600.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5E89C571-DE2E-E611-B7A8-0025905A608C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5EB79D4E-FB2E-E611-B9C4-0CC47A4D7630.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5EBB957B-F52E-E611-9469-0025904C637A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5EC79D96-BC2E-E611-9318-00259073E51A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/5EF0F290-B22E-E611-A3BD-008CFA1660F8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/60035354-242F-E611-9F51-F04DA275C2CE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/60040DA0-DC2E-E611-B81D-0CC47A4C8E96.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/603415A1-DF2E-E611-BE7B-0CC47A78A30E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/60436EF3-012F-E611-ACD2-0CC47A1E0722.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6051C676-1D2F-E611-9D5F-0CC47A4D765A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/608455A5-DC2E-E611-A5D0-0CC47A4C8EA8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/60B79E2B-5C2F-E611-A6E2-00266CF9B59C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/60C23D4F-022F-E611-88A7-0025905A6068.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/621469AE-DD2E-E611-8081-0CC47A74527A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/621A7FE9-082F-E611-9410-7845C4FC35D2.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/62283BA7-2B2F-E611-AC85-0CC47A4D7690.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/62A116A4-DF2E-E611-B5B1-848F69FD2973.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/62BE14F3-AC2E-E611-BAD6-7845C4F9CF06.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/62DE1DFF-B82E-E611-8A28-F04DA275C316.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/62E3158C-012F-E611-9945-0025905D1E00.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/640D2B54-252F-E611-BE87-0025905A60FE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/64112079-112F-E611-8AEE-0025905C4264.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6423E353-252F-E611-B0FC-0025905B85FC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/642CF49C-3A2F-E611-AAA8-0025905A497A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/642EA445-F42E-E611-96E0-0CC47A78A2F6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/64867ECC-2B2F-E611-BC29-0025905A613C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/648C8CA5-DF2E-E611-BBE5-848F69FD43A0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/64CCED32-B12E-E611-8BBF-0025905A6068.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/667716AC-DF2E-E611-9964-7845C4FC3767.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6682E5A2-AF2E-E611-B8BB-7845C4F9CF06.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6691284A-102F-E611-95EE-0CC47A4D76CC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/66A9A9D4-AB2E-E611-A7BD-0025905A48E4.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/66FF47C2-E22E-E611-8CB1-0025905A60B0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/680DCF6A-DA2E-E611-B172-0CC47A78A33E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/680FCFAD-3A2F-E611-9B12-0025905A6092.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/688802DD-B42E-E611-A3DF-3417EBE645AF.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/68EF8964-B72E-E611-BD0C-0025905A60A6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6A0E7A6C-D52E-E611-87A0-002590DB9152.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6A50B944-F42E-E611-A5AF-0CC47A4D75EC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6A8727A5-DF2E-E611-A2F0-0CC47A4D7600.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6AAAC7FB-5B2F-E611-A097-0025905A6066.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6AADBC16-172F-E611-9C25-0CC47A4D760A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6AFF0E6F-DE2E-E611-9136-848F69FD2817.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6C124B7D-DE2E-E611-891A-0025905A6088.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6C518762-E22E-E611-81F8-7845C4F914D4.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6C5766E9-E42E-E611-ADDB-003048FFCC16.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6C5ABF26-0A2F-E611-A07C-0CC47A1E046A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6C95383A-D42E-E611-8FEF-A0369F7FC070.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6CC3D26C-DE2E-E611-B497-F04DA275C007.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6CD9B44D-FB2E-E611-B424-0025905A6134.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6CE74BB3-DC2E-E611-AA28-0025905A60C6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6E141BC4-EB2E-E611-8A37-0025905A60CA.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6E32E6AE-E02E-E611-8352-0025905B8576.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6E8F70A6-102F-E611-8CFD-0025905A48D6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6EB7320A-092F-E611-9FE1-0CC47A4D76D0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6EC5A171-DE2E-E611-BB29-848F69FD4E8C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6EC7FC4F-DF2E-E611-9259-0025907B50BC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/6ED626EE-F32E-E611-BEC1-A0000420FE80.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/70085D25-432F-E611-8809-0CC47A4C8E96.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/70086271-DE2E-E611-B2A8-0025905A60C6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/702AE36D-DA2E-E611-8720-0025905A60B6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/709474F4-F32E-E611-B23C-0002C94CD0D8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7094BE67-AA2E-E611-AC4A-00259073E3D4.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/70C0D8BB-AB2E-E611-AAAB-B083FED734F5.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/70DC7052-472F-E611-A394-0025905A6090.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/72633CB9-DC2E-E611-8EF7-0025905A608A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/729A0DBC-BD2E-E611-B739-008CFA001444.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/729E28CB-F32E-E611-B685-0002C94CDACC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/72C96DFA-F42E-E611-8A55-008CFA0F51EC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7404197B-1D2F-E611-916E-0025905A611E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/74240954-252F-E611-9B41-0025905A60FE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/74548B6C-E22E-E611-9F67-0CC47A4D7674.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/74658D4D-022F-E611-A7D8-7845C4FC3B00.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7490EB6E-DA2E-E611-B858-0025905B8596.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/74B6EEA2-EB2E-E611-B606-0025905AA9F0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/74BB5F2C-0A2F-E611-B8C4-0090FAA57720.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/74D94FDC-B02E-E611-A313-180373FF94D6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/74E35AB6-D52E-E611-9E97-0025907277BE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/74EA4BA5-DF2E-E611-AFA3-7845C4FC3A70.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/74F58FEC-BB2F-E611-A7E2-24BE05C618F1.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/760FDEE2-242F-E611-8D6C-0CC47A4C8EC8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/76328CB4-DC2E-E611-9933-008CFAFBEBF2.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/76355E86-DB2E-E611-BB99-008CFA056400.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7647CD67-E22E-E611-80D4-0CC47A4D7626.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/764EDFD8-F32E-E611-9E31-0CC47A78A42C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7651E427-422F-E611-B971-0CC47A4D765E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/769F24D8-E52E-E611-AC22-008CFA0F5040.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/76D76A61-BB2E-E611-B57E-A0369F7FC070.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/76ED1352-BB2E-E611-BF76-549F358EB7B0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/78130D88-EB2E-E611-8231-0025905A611E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7823B37A-242F-E611-8ABE-7845C4FC3B1B.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/78319A77-F62E-E611-8A2A-0025905C54F4.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/783CA457-472F-E611-B20F-0025905A6064.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/78A4D350-022F-E611-85C0-0025907B4F5A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/78B3B20E-FC2E-E611-84DA-0CC47A4D75F6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/78EDFE84-EB2E-E611-A81A-0CC47A4D7604.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7A07B982-DB2E-E611-A38F-0CC47A74524E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7A1AAE46-552F-E611-8414-0025905A60FE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7A525A70-242F-E611-BB60-0CC47A78A4B0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7A5D2846-B22E-E611-934F-848F69FD090E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7A5FAAB0-E12E-E611-B2AE-0025905B85AE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7A65C1A7-EB2E-E611-A705-0025905A60CA.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7A7736B7-DC2E-E611-B167-180373FFCED8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7AA1956D-562F-E611-AC3B-0090FAA576A0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7AC430E0-AD2E-E611-9247-0025905A60B6.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7C1AB705-092F-E611-AE3F-0CC47A4D765A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7C3B9DA5-DF2E-E611-A9C9-3417EBE64BAF.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7C41772A-5C2F-E611-BA74-0CC47A78A3E8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7C7DCAC6-F42E-E611-A9FB-A0000420FE80.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7C86644E-A72E-E611-91B4-008CFA1660F8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7C96F56F-DA2E-E611-9930-0025905B8598.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7CA0C1B5-DC2E-E611-B492-0CC47A4D7630.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7CBDDE6F-DE2E-E611-A4EB-0CC47A4D7630.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7CEC3D8C-012F-E611-B222-0CC47A4C8EBA.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7E360187-D42E-E611-BA30-008CFA14F814.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7E470450-102F-E611-A488-0CC47A78A3EE.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7E72D329-E22E-E611-8D62-0025905A6094.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7E7DF64B-FB2E-E611-8496-0CC47A78A3B4.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7ED64CBD-F32E-E611-9CEC-24BE05C38C91.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/7EEFD25A-112F-E611-837F-0025905C4264.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/80095CA6-DF2E-E611-AF3B-7845C4FC3B8A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/80200F38-472F-E611-88F5-0CC47A4C8E1C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/80230B20-422F-E611-B4D8-0CC47A78A408.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/80294EF2-E52E-E611-9B2F-008CFAF50C9E.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/802F3587-EB2E-E611-BA62-0025907B4E24.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/8051A8A7-2B2F-E611-984E-0025905B858A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/8056E14E-FB2E-E611-A9EE-0CC47A4C8E66.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/805F27B5-DC2E-E611-9B6E-0025905A610C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/8062AFB6-DC2E-E611-894C-0025905B860C.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/80672E6D-DE2E-E611-8FE7-848F69FD43A0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/8072726D-DA2E-E611-835C-0025905B85FC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/807C512A-5C2F-E611-A643-003048FFD734.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/808A9151-FB2E-E611-AC28-0025905A60F8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/80D2C447-B22E-E611-8AC6-005056021007.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/80F6E69E-052F-E611-8CDD-842B2B2A9926.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/82006946-B22E-E611-BF0E-F04DA275C03D.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/8209B81A-E52E-E611-B1E0-0CC47A74527A.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/82431D4B-102F-E611-9809-0CC47A1DF7F8.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/8244A838-FB2E-E611-B76A-0025905A48BC.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/8245D4B6-DC2E-E611-9D00-0025905A60E0.root',
+        # 'root://eospublic.cern.ch//eos/opendata/cms/Run2015D/SingleElectron/MINIAOD/08Jun2016-v1/10000/82609885-BB2E-E611-8B62-549F35AF4524.root'
+    )
+                         
+    # useAOD = False 
+    # if useAOD == True :
+    #     inputFiles = inputFilesAOD
+    #     outputFile = "electron_ntuple.root"
+    #     print("AOD input files are used")
+    # else :
+    #inputFiles = inputFilesMiniAOD
+    outputFiles = "myElectrons1.root"
+    print("MiniAOD input files are used")
 
-process.source = cms.Source ("PoolSource", fileNames = inputFiles ) 
+else:
+    inputFiles = cms.untracked.vstring(
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/1EC2362C-3E0F-E611-8600-0025905A60B2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/3049197E-2A0F-E611-A1C5-0025905B8566.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/388DD773-3E0F-E611-ABE2-0CC47A4D767C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/3E9AA97A-200F-E611-8FB1-0CC47A78A4B0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/4EE9E036-280F-E611-AC23-0CC47A78A41C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/82902238-280F-E611-A2F6-0025905A6090.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/8AAC1755-330F-E611-B517-0CC47A4D7670.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/9C8FF22F-330F-E611-BAA0-0025905A48B2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/AACBE5A5-200F-E611-A31C-0CC47A4D762E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/C4F68E76-2A0F-E611-9EB1-0025905B8580.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/D4A5F572-530F-E611-857E-0CC47A4D75F2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/DE70467B-9F0D-E611-A0DB-002481DE48D8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/E0E6B470-530F-E611-95E1-0CC47A4C8E5E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/EC6B7FE0-410F-E611-BAD0-0025905A60F4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/30000/42BF2945-D40F-E611-B3B4-002590D0B05C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/50000/0A904684-690D-E611-9BF8-44A84225CDFE.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/50000/1CC03CB4-050E-E611-A56D-1CC1DE1927A2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/50000/32926368-E40C-E611-9C60-0090FAA57360.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/50000/828E0B19-BD0C-E611-9E36-842B2B758AD8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/50000/C0CEE59E-B50D-E611-A152-001E67397003.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/50000/FEB08C63-4D0D-E611-B8AF-008CFA56D794.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/00365CC1-E40C-E611-8952-0090FAA58BF4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/0E4055AF-8C10-E611-8231-0090FAA59114.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/0E5F8C06-8A10-E611-AED3-0090FAA57E24.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/0ED43158-060F-E611-85DF-842B2B2925F5.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/105E30BE-6F0F-E611-8A81-001E674440E2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/12CACA33-9110-E611-B8C0-002590747E0E.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/18BC54A2-7310-E611-B9A0-0090FAA58B94.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/1A282622-9110-E611-A0EC-005056021113.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/1C5F39A8-6F0F-E611-95AD-BCAEC528225F.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/1CAA9B23-9110-E611-A97F-0090FAA572B0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/2604A000-CF0F-E611-9C35-0002C94D5502.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/26CA8CE4-250E-E611-8C7C-002590D60026.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/2A65EAAB-6F0F-E611-91E2-1C6A7A263123.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/2A968722-8910-E611-B98C-00259073E38A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/2EFFCF28-9110-E611-8EE2-0CC47A78A340.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/304D8955-8310-E611-B1EE-20CF3027A637.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/36677932-9110-E611-B772-00259073E35A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/3E84EC26-9110-E611-99A2-0090FAA573D0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/40B75210-8A10-E611-835B-0CC47A1DF7F8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/44EB4D9E-8C10-E611-859B-0090FAA57630.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/4629D18F-8710-E611-98CF-0025907B501C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/4ACBB726-9110-E611-8D4C-003048F5ADF2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/4CE03729-8910-E611-A868-0090FAA57560.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/4E278BCA-4B10-E611-8DAC-44A8422411EB.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/50D82C19-3F10-E611-A386-AC853DA06A54.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/52FD6156-060F-E611-94E2-008CFA110AF4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/56E046E0-0A0F-E611-AADB-008CFA502F76.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/603CA57C-AD10-E611-BFC6-0025905C5474.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/64898FF9-8B10-E611-943E-0CC47A1DF7F8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/6604CE97-6F0F-E611-8508-0CC47A78A45A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/6E35E141-9110-E611-8E53-008CFA0A5614.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/7244C4A5-6F0F-E611-BD9F-002590E39DF4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/7CB373AB-7210-E611-9618-0090FAA57630.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/80847FB6-730F-E611-A8C3-D067E5F91455.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/822385EC-7B0C-E611-820F-6C3BE5B594A0.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/928B6504-8A10-E611-B7AB-0090FAA58084.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/A4373381-5D0C-E611-9944-20CF3027A5FA.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/A4742718-9110-E611-A737-02163E0142EF.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/A6554E53-8310-E611-8584-0090FAA58B64.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/A8D94C2A-9110-E611-B351-002590A80DEA.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/B20C38CB-8B10-E611-B0A5-0090FAA58084.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/B24CD128-9110-E611-B3C2-0CC47A78A3E8.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/C0AA0C2F-8910-E611-B5BF-0025905A48FC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/CC173E20-6610-E611-9D3C-0CC47A1E0478.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/CC9BDC59-FC0E-E611-A12B-842B2B2922E2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/D4A46C63-FC0E-E611-A0A8-008CFAF50B90.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/DA15E187-DC0F-E611-837F-008CFA197CA4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/DC464DB1-7210-E611-AA46-00259073E4A2.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/E27A19EF-BF0B-E611-AFED-0090FAA57410.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/E6888D0D-8A10-E611-852D-0025907B501C.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/EC6A09B6-6F0F-E611-A9AE-0025905A608A.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/F0877BAF-7310-E611-A26D-00259073E3B4.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/60000/FA7D259C-8710-E611-A3D9-0090FAA57E24.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/1C6EFEEE-870E-E611-B08C-002590D5FFFA.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/38BC6B1F-AF0C-E611-A999-90B11C2AA388.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/42832389-8F0C-E611-97C6-00259073E504.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/4455BBC4-CA0B-E611-B0CD-B083FED16468.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/A8A45E31-D00B-E611-9147-1CB72C1B2D84.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/E237B645-AF0C-E611-B24B-549F3525DDFC.root',
+        'root://eospublic.cern.ch//eos/opendata/cms/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_PythiaFragment_Up/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/70000/E2CD3BBE-400F-E611-ABF3-0090FAA57C60.root'
+
+    )
+                   
+    outputFiles = "myMCElectrons1.root"
+    print("MC MiniAOD input files are used")
 
 #Specify the appropriate Globaltag for the respective CMSSW verison and data used.
-process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/76X_dataRun2_16Dec2015_v0.db')
-process.GlobalTag.globaltag = '76X_dataRun2_16Dec2015_v0'
+if isData:
+    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/76X_dataRun2_16Dec2015_v0.db')
+    process.GlobalTag.globaltag = '76X_dataRun2_16Dec2015_v0'
+else:
+    process.GlobalTag.connect = cms.string('sqlite_file:/cvmfs/cms-opendata-conddb.cern.ch/76X_mcRun2_asymptotic_RunIIFall15DR76_v1.db')
+    process.GlobalTag.globaltag = '76X_mcRun2_asymptotic_RunIIFall15DR76_v1'
+
+    
+#for (fi,fo) in zip(inputFiles,outputFiles):
+process.source = cms.Source ("PoolSource", fileNames = inputFiles ) 
+    
 
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 
@@ -57,36 +682,57 @@ dataFormat = DataFormat.MiniAOD
 switchOnVIDElectronIdProducer(process, dataFormat)
 # define which IDs we want to produce
 my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff'
-]
+                 ]
 
 #add them to the VID producer
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
-
-
-process.elecs = cms.EDAnalyzer('Eledata',
-    rho      = cms.InputTag("fixedGridRhoFastjetAll"),
-    beamSpot = cms.InputTag('offlineBeamSpot'),
-    #
-    # Objects specific to AOD format
-    #
-    # electrons    = cms.InputTag("gedGsfElectrons"),
-    # vertices     = cms.InputTag("offlinePrimaryVertices"),
-    # conversions  = cms.InputTag('allConversions'),
-    #
-    # Objects specific to MiniAOD format
-    #
-    electronsMiniAOD= cms.InputTag("slimmedElectrons"), 
-    # verticesMiniAOD = cms.InputTag("offlineSlimmedPrimaryVertices"),
-    conversionsMiniAOD = cms.InputTag('reducedEgamma:reducedConversions'),
-    #
-    # Effective areas for computing PU correction for isolations
-    effAreasConfigFile = cms.FileInPath("RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_25ns.txt")
     
-)
+#----- Evaluate the Type-1 correction -----#
+# process.Type1CorrForNewJEC = patPFMetT1T2Corr.clone(
+#         isMC = cms.bool(isMC),
+#         src = cms.InputTag("slimmedJetsNewJEC"),
+#         )
+# process.slimmedMETsNewJEC = cms.EDProducer('CorrectedPATMETProducer',
+#         src = cms.InputTag('uncorrectedPatMet'),
+#         srcCorrections = cms.VInputTag(cms.InputTag('Type1CorrForNewJEC', 'type1'))
+#         )
 
-process.TFileService = cms.Service("TFileService", fileName=cms.string(outputFile))
-
+#----- Configure Electron analyzer -----#
+process.elecs = cms.EDAnalyzer('Eledata',
+                               rho      = cms.InputTag("fixedGridRhoFastjetAll"),
+                               beamSpot = cms.InputTag('offlineBeamSpot'),
+                               mets     = cms.InputTag("slimmedMETs"),
+                               #
+                               # Objects specific to AOD format
+                               #
+                               # electrons    = cms.InputTag("gedGsfElectrons"),
+                               # vertices     = cms.InputTag("offlinePrimaryVertices"),
+                               # conversions  = cms.InputTag('allConversions'),
+                               #
+                               # Objects specific to MiniAOD format
+                               #
+                               electronsMiniAOD = cms.InputTag("slimmedElectrons"), 
+                               # verticesMiniAOD = cms.InputTag("offlineSlimmedPrimaryVertices"),
+                               conversionsMiniAOD = cms.InputTag('reducedEgamma:reducedConversions'),
+                               #
+                               # Effective areas for computing PU correction for isolations
+                               effAreasConfigFile = cms.FileInPath("RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_25ns.txt")
+                               
+                               )
+    
+#----- RUN THE JOB! -----#
+process.TFileService = cms.Service("TFileService", fileName=cms.string(outputFiles))
 process.p = cms.Path(process.elecs)
 
-
+process.maxEvents.input = options.maxEvents
+process.TFileService.fileName = outputFiles
+if len(options.inputFiles) > 0:
+    process.source.fileNames=options.inputFiles
+    
+print "Processing for maxEvents =  ",process.maxEvents.input
+print "Processing input files "
+for fl in process.source.fileNames:
+    print "  > ",fl
+print "Output filename : ",process.TFileService.fileName
+    

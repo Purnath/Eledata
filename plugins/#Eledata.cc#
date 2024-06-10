@@ -321,7 +321,7 @@ Eledata::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     float abseta =  abs(el->superCluster()->eta());
     float eA = effectiveAreas_.getEffectiveArea(abseta);
     ele_relCombIsoWithEA.push_back( ( pfIso.sumChargedHadronPt
-				       + std::max( 0.0f, pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - eA*rho_) )/ el->pt() );
+				      + std::max( 0.0f, pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - eA*rho_) )/ el->pt() );
 
     bool passConvVeto = !ConversionTools::hasMatchedConversion(*el, conversions, theBeamSpot->position());
     ele_passConversionVeto_.push_back( (int) passConvVeto );
