@@ -104,21 +104,21 @@ void ptetaphiplots() {
 
     // Create histograms for data
     TH1F *tag_Et  = new TH1F("E_tag","E_T tag", 70,0,2500 );
-    TH1F *tag_pt  = new TH1F("pt_tag","p_T tag", 70,0,900 );
+    TH1F *tag_pt  = new TH1F("pt_tag","p_T tag", 70,0,500 );
     TH1F *tag_eta = new TH1F("eta_tag","|#eta| tag", 60,0,3.5 );
     TH1F *tag_phi = new TH1F("phi_tag","#phi tag", 50,-pi,pi );
     TH1F *prb_Et  = new TH1F("E_prb","Et probe", 70,0,1000 );
-    TH1F *prb_pt  = new TH1F("pt_prb","pt probe", 70,0,350 );
+    TH1F *prb_pt  = new TH1F("pt_prb","pt probe", 70,0,250 );
     TH1F *prb_eta = new TH1F("eta_prb","|#eta| probe", 60,0,3.5 );
     TH1F *prb_phi = new TH1F("phi_prb","#phi probe", 50,-pi,pi );
 
     // Create histograms for MC
     TH1F *tag_Et_MC  = new TH1F("E_tag_MC","E_T tag MC", 70,0,2500 );
-    TH1F *tag_pt_MC  = new TH1F("pt_tag_MC","p_T tag MC", 70,0,900 );
+    TH1F *tag_pt_MC  = new TH1F("pt_tag_MC","p_T tag MC", 70,0,500 );
     TH1F *tag_eta_MC = new TH1F("eta_tag_MC","|#eta| tag MC", 60,0,3.5 );
     TH1F *tag_phi_MC = new TH1F("phi_tag_MC","#phi tag MC", 50,-pi,pi );
     TH1F *prb_Et_MC  = new TH1F("E_prb_MC","Et probe MC", 70,0,1000 );
-    TH1F *prb_pt_MC  = new TH1F("pt_prb_MC","pt probe MC", 70,0,350 );
+    TH1F *prb_pt_MC  = new TH1F("pt_prb_MC","pt probe MC", 70,0,250 );
     TH1F *prb_eta_MC = new TH1F("eta_prb_MC","|#eta| probe MC", 60,0,3.5 );
     TH1F *prb_phi_MC = new TH1F("phi_prb_MC","#phi probe MC", 50,-pi,pi );
 
@@ -128,6 +128,7 @@ void ptetaphiplots() {
       if (i%10000==0)
 	std::cout<<i/10000<<"\t";
       tree->GetEntry(i);
+      if(tag_Ele_isTight==1){
       tag_Et->Fill(tag_Ele_e);
       tag_pt->Fill(tag_Ele_pt);
       tag_eta->Fill(abs(tag_Ele_eta));
@@ -135,7 +136,7 @@ void ptetaphiplots() {
       prb_Et->Fill(probe_Ele_e);
       prb_pt->Fill(probe_Ele_pt);
       prb_eta->Fill(abs(probe_Ele_eta));
-      prb_phi->Fill(probe_Ele_phi);
+      prb_phi->Fill(probe_Ele_phi);}
     }
 
     // Loop over MC entries and fill histograms
@@ -144,6 +145,7 @@ void ptetaphiplots() {
       if (i%10000==0)
 	std::cout<<i/10000<<"\t";
       tree2->GetEntry(i);
+      if(tag_Ele_isTightMC==1){
       tag_Et_MC->Fill(tag_Ele_eMC);
       tag_pt_MC->Fill(tag_Ele_ptMC);
       tag_eta_MC->Fill(abs(tag_Ele_etaMC));
@@ -151,7 +153,7 @@ void ptetaphiplots() {
       prb_Et_MC->Fill(probe_Ele_eMC);
       prb_pt_MC->Fill(probe_Ele_ptMC);
       prb_eta_MC->Fill(abs(probe_Ele_etaMC));
-      prb_phi_MC->Fill(probe_Ele_phiMC);
+      prb_phi_MC->Fill(probe_Ele_phiMC);}
     }
 
     tag_Et_MC->Scale(tag_Et->Integral()/tag_Et_MC->Integral());
